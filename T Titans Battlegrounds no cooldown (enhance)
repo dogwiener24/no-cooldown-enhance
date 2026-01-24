@@ -1,0 +1,184 @@
+-- Made by WienerDog + ChatGPT
+-- No Cooldown (enhance) 🐝
+
+local BUFFS = {
+    NUM_ROCKS = 8,
+    NUM_SHOTS = 60,
+    RECHARGE_DOWNTIME = 0,
+    CurrentCooldown = 0,
+    DEBOUNCE = 0,
+    MAX_NUM_HUMANOIDS_HIT = 999,
+    PROJECTILE_SPEED = 299,
+    CHARGE_DURATION = 3,
+    ATTACK_DURATION = 0,
+    SHOCKS_PER_SECOND = 0,
+    ZONE_LIFETIME = 8,
+    ACTIVE_DURATION = 1,
+    HEAL_PER_SECOND = 0,
+    PAUSE_DURATION = 0,
+    SWING_DURATION = 3,
+    SLOW_DURATION = 3,
+    PUSH_FORCE = 500,
+    SHOTS_PER_BURST = 8,
+    BLIND_DURATION = 9,
+    CLONE_HEALTH_LOST_PER_SECOND = 0.1,
+    NUM_SPIKE_WAVES = 13,
+    RAGE_DURATION = 20,
+    NUM_ATTACKS = 14,
+    NUM_TRIPLE_SHOTS = 10,
+    NUM_AOE_SHOTS = 3,
+    NUM_SCATTER_SHOTS = 31,
+    HEAVY_DAMAGE = 30,
+    LIGHT_DAMAGE = 15,
+    FLIGHT_DURATION = 10,
+    NUM_BOMBS = 10,
+    TNT_DAMAGE = 35,
+    TOXIC_BARREL_TICK_DAMAGE = 20,
+    NUM_BURSTS = 10,
+    MAX_NUM_PER_ATTACK = 10,
+}
+
+local originalValues = {}
+local enabled = false
+
+local function applyBuffs()
+    if enabled then return end
+    enabled = true
+    for _, tbl in next, getgc(true) do
+        if type(tbl) == "table" then
+            for key, value in pairs(BUFFS) do
+                if rawget(tbl, key) ~= nil then
+                    originalValues[tbl] = originalValues[tbl] or {}
+                    if originalValues[tbl][key] == nil then
+                        originalValues[tbl][key] = tbl[key]
+                    end
+                    setreadonly(tbl, false)
+                    rawset(tbl, key, value)
+                    setreadonly(tbl, true)
+                end
+            end
+        end
+    end
+end
+
+local function resetBuffs()
+    if not enabled then return end
+    enabled = false
+    for tbl, keys in pairs(originalValues) do
+        setreadonly(tbl, false)
+        for key, value in pairs(keys) do
+            rawset(tbl, key, value)
+        end
+        setreadonly(tbl, true)
+    end
+    table.clear(originalValues)
+end
+
+-- UI (Brown/Yellow/Black)
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Parent = game.CoreGui
+local Main = Instance.new("Frame")
+Main.Size = UDim2.fromScale(0.22, 0.22)
+Main.Position = UDim2.fromScale(0.39, 0.35)
+Main.BackgroundColor3 = Color3.fromRGB(255, 210, 70)
+Main.BorderSizePixel = 2
+Main.BorderColor3 = Color3.fromRGB(0, 0, 0)
+Main.Parent = ScreenGui
+Main.Active = true
+Main.ClipsDescendants = true
+Instance.new("UICorner", Main).CornerRadius = UDim.new(0, 18)
+
+local Title = Instance.new("TextLabel")
+Title.Size = UDim2.new(1, 0, 0.28, 0)
+Title.BackgroundColor3 = Color3.fromRGB(120, 75, 30)
+Title.BorderSizePixel = 0
+Title.Text = "🐝 No Cooldown (enhance)"
+Title.Font = Enum.Font.GothamBold
+Title.TextSize = 18
+Title.TextColor3 = Color3.fromRGB(0, 0, 0)
+Title.Parent = Main
+Instance.new("UICorner", Title)
+local TitlePadding = Instance.new("UIPadding")
+TitlePadding.PaddingLeft = UDim.new(0, 10)
+TitlePadding.PaddingRight = UDim.new(0, 10)
+TitlePadding.Parent = Title
+
+local Toggle = Instance.new("TextButton")
+Toggle.Size = UDim2.fromScale(0.8, 0.32)
+Toggle.Position = UDim2.fromScale(0.1, 0.45)
+Toggle.Text = "OFF"
+Toggle.Font = Enum.Font.GothamBold
+Toggle.TextSize = 20
+Toggle.TextColor3 = Color3.fromRGB(0, 0, 0)
+Toggle.BackgroundColor3 = Color3.fromRGB(160, 100, 50)
+Toggle.BorderSizePixel = 2
+Toggle.BorderColor3 = Color3.fromRGB(0, 0, 0)
+Toggle.Parent = Main
+Instance.new("UICorner", Toggle)
+
+Toggle.MouseButton1Click:Connect(function()
+    if enabled then
+        resetBuffs()
+        Toggle.Text = "OFF"
+        Toggle.BackgroundColor3 = Color3.fromRGB(160, 100, 50)
+    else
+        applyBuffs()
+        Toggle.Text = "ON"
+        Toggle.BackgroundColor3 = Color3.fromRGB(255, 235, 90)
+    end
+end)
+
+local Close = Instance.new("TextButton")
+Close.Size = UDim2.fromScale(0.15, 0.18)
+Close.Position = UDim2.fromScale(0.82, 0.04)
+Close.Text = "✕"
+Close.Font = Enum.Font.GothamBold
+Close.TextSize = 18
+Close.TextColor3 = Color3.fromRGB(0, 0, 0)
+Close.BackgroundColor3 = Color3.fromRGB(180, 110, 60)
+Close.BorderSizePixel = 2
+Close.BorderColor3 = Color3.fromRGB(0, 0, 0)
+Close.Parent = Main
+Instance.new("UICorner", Close)
+Close.MouseButton1Click:Connect(function()
+    Main.Visible = false
+end)
+
+local Open = Instance.new("TextButton")
+Open.Size = UDim2.fromScale(0.08, 0.08)
+Open.Position = UDim2.fromScale(0.02, 0.45)
+Open.Text = "🐝"
+Open.Font = Enum.Font.GothamBold
+Open.TextSize = 22
+Open.TextColor3 = Color3.fromRGB(0, 0, 0)
+Open.BackgroundColor3 = Color3.fromRGB(255, 210, 70)
+Open.BorderSizePixel = 2
+Open.BorderColor3 = Color3.fromRGB(0, 0, 0)
+Open.Parent = ScreenGui
+Instance.new("UICorner", Open)
+Open.MouseButton1Click:Connect(function()
+    Main.Visible = true
+end)
+
+-- Drag system
+local UserInputService = game:GetService("UserInputService")
+local dragging, dragStart, startPos
+local function updateDrag(input)
+    local delta = input.Position - dragStart
+    Main.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+end
+Main.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        dragging = true
+        dragStart = input.Position
+        startPos = Main.Position
+        input.Changed:Connect(function()
+            if input.UserInputState == Enum.UserInputState.End then dragging = false end
+        end)
+    end
+end)
+Main.InputChanged:Connect(function(input)
+    if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+        updateDrag(input)
+    end
+end)
